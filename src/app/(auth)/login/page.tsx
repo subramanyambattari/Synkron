@@ -71,7 +71,7 @@ const LoginPage = () => {
           justify-left
           items-center"
         >
-          <Image src="/logo.png" alt="cypress Logo" width={50} height={50} />
+          <Image src="/logo.png" alt="Synkron Logo" width={50} height={50} />
           <span
             className="font-semibold
           dark:text-white text-4xl first-letter:ml-2"
