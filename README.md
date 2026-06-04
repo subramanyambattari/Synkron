@@ -32,13 +32,13 @@ To run the Synkron locally, follow these steps:
 1. Clone the repository to your local machine:
 
    ```bash
-   git clone https://github.com/Devsethi3/synkron.git
+   git clone https://github.com/subramanyambattari/-Synkron.git
    ```
 
 2. Navigate to the project directory:
 
    ```bash
-   cd synkron
+   cd -Synkron
    ```
 
 3. Install dependencies:
