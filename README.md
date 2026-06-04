@@ -23,37 +23,25 @@ Welcome to the Synkron repository! Synkron Notes App is a cutting-edge SaaS plat
 
 ## Getting Started
 
-To run the Synkron locally, follow these steps:
+To run Synkron locally, follow these steps:
 
-1. Clone the repository to your local machine:
-
-   ```bash
-   git clone https://github.com/subramanyambattari/Synkron.git
-   ```
-
-2. Navigate to the project directory:
-
-   ```bash
-   cd Synkron
-   ```
-
-3. Install dependencies:
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-4. Set up Supabase and PostgreSQL according to your environment.
+2. Set up Supabase and PostgreSQL according to your environment.
 
-5. Configure environment variables for Supabase, Stripe, and other services.
+3. Configure environment variables for Supabase, Stripe, and other services.
 
-6. Start the development server:
+4. Start the development server:
 
    ```bash
    npm run dev
    ```
 
-7. Open your web browser and visit [http://localhost:3000](http://localhost:3000) to use the app.
+5. Open your web browser and visit [http://localhost:3000](http://localhost:3000) to use the app.
 
 ## Usage
 

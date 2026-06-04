@@ -10,10 +10,21 @@ import {
 } from 'drizzle-orm/pg-core';
 import {
   prices,
+  pricingPlanInterval,
+  pricingType,
   products,
   subscriptionStatus,
   users,
 } from '../../../migrations/schema';
+
+export {
+  prices,
+  pricingPlanInterval,
+  pricingType,
+  products,
+  subscriptionStatus,
+  users,
+};
 
 export const workspaces = pgTable('workspaces', {
   id: uuid('id').defaultRandom().primaryKey().notNull(),

@@ -4,7 +4,10 @@ import { AuthUser } from '@supabase/supabase-js';
 import { Subscription } from '../supabase/supabase.types';
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { getUserSubscriptionStatus } from '../supabase/queries';
+import {
+  getUserSubscriptionStatus,
+  upsertUserProfile,
+} from '../supabase/queries';
 import { useToast } from '@/components/ui/use-toast';
 
 type SupabaseUserContextType = {
@@ -51,6 +54,7 @@ export const SupabaseUserProvider: React.FC<SupabaseUserProviderProps> = ({
       if (user) {
         console.log(user);
         setUser(user);
+        await upsertUserProfile({ id: user.id, email: user.email });
         const { data, error } = await getUserSubscriptionStatus(user.id);
         if (data) setSubscription(data);
         if (error) {

@@ -251,6 +251,32 @@ export const findUser = async (userId: string) => {
   return response;
 };
 
+export const upsertUserProfile = async (user: {
+  id: string;
+  email?: string | null;
+}) => {
+  if (!user.id) return;
+
+  const existingUser = await db.query.users.findFirst({
+    where: (u, { eq }) => eq(u.id, user.id),
+  });
+
+  if (existingUser) {
+    if (existingUser.email !== user.email) {
+      await db
+        .update(users)
+        .set({ email: user.email })
+        .where(eq(users.id, user.id));
+    }
+    return;
+  }
+
+  await db.insert(users).values({
+    id: user.id,
+    email: user.email,
+  });
+};
+
 export const getActiveProductsWithPrice = async () => {
   try {
     const res = await db.query.products.findMany({

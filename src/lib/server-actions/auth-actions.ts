@@ -4,6 +4,8 @@ import { z } from 'zod';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { FormSchema } from '../types';
 import { cookies } from 'next/headers';
+import db from '../supabase/db';
+import { users } from '../../../migrations/schema';
 
 export async function actionLoginUser({
   email,
@@ -22,12 +24,14 @@ export async function actionSignUpUser({
   password,
 }: z.infer<typeof FormSchema>) {
   const supabase = createRouteHandlerClient({ cookies });
-  const { data } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('email', email);
+  const existingUser = await db.query.users.findFirst({
+    where: (user, { eq }) => eq(user.email, email),
+  });
 
-  if (data?.length) return { error: { message: 'User already exists', data } };
+  if (existingUser) {
+    return { error: { message: 'User already exists', data: existingUser } };
+  }
+
   const response = await supabase.auth.signUp({
     email,
     password,
@@ -35,5 +39,13 @@ export async function actionSignUpUser({
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}api/auth/callback`,
     },
   });
+
+  if (response.data.user) {
+    await db.insert(users).values({
+      id: response.data.user.id,
+      email: response.data.user.email,
+    });
+  }
+
   return response;
 }
