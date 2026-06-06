@@ -3,6 +3,7 @@
 import TitleSection from "@/components/landingPage/TitleSection";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 import Cal from "../../../public/cal.png";
 import { twMerge } from "tailwind-merge";
 import clsx from "clsx";
@@ -13,11 +14,8 @@ import Diamond from "../../../public/icons/diamond.svg";
 import CheckIcon from "../../../public/icons/check.svg";
 import { CLIENTS, PRICING_CARDS, PRICING_PLANS, USERS } from "@/lib/constants";
 import Banner from "../../../public/appBanner.png";
-import { useRouter } from "next/navigation";
-import { randomUUID } from "crypto";
 
 const HomePage = () => {
-  const router = useRouter();
   return (
     <>
       {/* <Header /> */}
@@ -40,7 +38,7 @@ const HomePage = () => {
           "
           >
             <Button
-              onClick={() => router.push("/login")}
+              asChild
               className=" w-full
             rounded-[10px]
             p-6
@@ -49,7 +47,7 @@ const HomePage = () => {
             dark:text-white text-black hover:text-black dark:hover:text-white
             "
             >
-              Get Synkron Free
+              <a href="/login">Get Synkron Free</a>
             </Button>
           </div>
           <div
@@ -106,8 +104,8 @@ const HomePage = () => {
           before:absolute
           "
           >
-            {[...Array(2)].map((arr) => (
-              <div key={arr} className="flex flex-nowrap animate-slide">
+            {[...Array(2)].map((_, index) => (
+              <div key={index} className="flex flex-nowrap animate-slide">
                 {CLIENTS.map((client) => (
                   <Image
                     key={client.alt}

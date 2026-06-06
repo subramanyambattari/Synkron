@@ -45,6 +45,7 @@ const LoginPage = () => {
       setSubmitError("Invalid email or password. Please try again.");
     } else {
       // User exists, redirect to dashboard
+      router.refresh();
       router.replace("/dashboard");
     }
   };
