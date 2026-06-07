@@ -40,14 +40,17 @@ const LoginPage = () => {
     if (error) {
       form.reset();
       setSubmitError(error.message);
-    } else if (!data) {
-      // User does not exist or credentials are invalid
-      setSubmitError("Invalid email or password. Please try again.");
-    } else {
-      // User exists, redirect to dashboard
-      router.refresh();
-      router.replace("/dashboard");
+      return;
     }
+
+    if (!data?.session) {
+      // User does not exist or credentials are invalid
+      form.reset();
+      setSubmitError("Invalid email or password. Please try again.");
+      return;
+    }
+
+    router.push("/dashboard");
   };
 
   useEffect(() => {
