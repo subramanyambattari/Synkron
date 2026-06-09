@@ -30,6 +30,7 @@ const BannerUploadForm: React.FC<BannerUploadFormProps> = ({ dirType, id }) => {
   const { state, workspaceId, folderId, dispatch } = useAppState();
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const {
     register,
@@ -45,20 +46,53 @@ const BannerUploadForm: React.FC<BannerUploadFormProps> = ({ dirType, id }) => {
   const onSubmitHandler: SubmitHandler<
     z.infer<typeof UploadBannerFormSchema>
   > = async (values) => {
+    setUploadError(null);
     const file = values.banner?.[0];
-    if (!file || !id) return;
+    if (!file) {
+      setUploadError("No file found in form values.");
+      return;
+    }
+    if (!id) {
+      setUploadError("No ID provided for directory.");
+      return;
+    }
+    
     try {
       let filePath = null;
 
       const uploadBanner = async () => {
+        let oldPath = "";
+        if (dirType === "workspace") {
+          oldPath = state.workspaces.find((w) => w.id === id)?.bannerUrl || "";
+        } else if (dirType === "folder") {
+          const workspace = state.workspaces.find((w) => w.id === workspaceId);
+          oldPath = workspace?.folders.find((f) => f.id === id)?.bannerUrl || "";
+        } else if (dirType === "file") {
+          const workspace = state.workspaces.find((w) => w.id === workspaceId);
+          const folder = workspace?.folders.find((f) => f.id === folderId);
+          oldPath = folder?.files.find((f) => f.id === id)?.bannerUrl || "";
+        }
+
+        if (oldPath) {
+          await supabase.storage.from("file-banners").remove([oldPath]);
+        }
+        
+        const newPath = `banner-${id}-${Date.now()}`;
         const { data, error } = await supabase.storage
           .from("file-banners")
-          .upload(`banner-${id}`, file, { cacheControl: "5", upsert: true });
-        if (error) throw new Error();
+          .upload(newPath, file, { cacheControl: "5", upsert: true });
+        if (error) {
+          setUploadError(error.message || "Failed to upload to Supabase storage");
+          throw new Error(error.message);
+        }
         filePath = data.path;
       };
+      
       if (dirType === "file") {
-        if (!workspaceId || !folderId) return;
+        if (!workspaceId || !folderId) {
+          setUploadError("Missing workspaceId or folderId for file.");
+          return;
+        }
         await uploadBanner();
         dispatch({
           type: "UPDATE_FILE",
@@ -71,7 +105,10 @@ const BannerUploadForm: React.FC<BannerUploadFormProps> = ({ dirType, id }) => {
         });
         await updateFile({ bannerUrl: filePath }, id);
       } else if (dirType === "folder") {
-        if (!workspaceId || !folderId) return;
+        if (!workspaceId || !folderId) {
+          setUploadError("Missing workspaceId or folderId for folder.");
+          return;
+        }
         await uploadBanner();
         dispatch({
           type: "UPDATE_FOLDER",
@@ -83,18 +120,22 @@ const BannerUploadForm: React.FC<BannerUploadFormProps> = ({ dirType, id }) => {
         });
         await updateFolder({ bannerUrl: filePath }, id);
       } else if (dirType === "workspace") {
-        if (!workspaceId) return;
         await uploadBanner();
         dispatch({
           type: "UPDATE_WORKSPACE",
           payload: {
             workspace: { bannerUrl: filePath },
-            workspaceId,
+            workspaceId: id,
           },
         });
         await updateWorkspace({ bannerUrl: filePath }, id);
       }
-    } catch (error) {}
+      
+      // If success, we should probably reset or at least clear error
+      setUploadError("Success! Please close the modal.");
+    } catch (error: any) {
+      setUploadError(error.message || "An unexpected error occurred");
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,8 +158,10 @@ const BannerUploadForm: React.FC<BannerUploadFormProps> = ({ dirType, id }) => {
         type="file"
         accept="image/*"
         disabled={isUploading}
-        {...register("banner", { required: "Banner Image is required" })}
-        onChange={handleFileChange}
+        {...register("banner", { 
+          required: "Banner Image is required",
+          onChange: handleFileChange 
+        })}
       />
       {imagePreview && (
         <img
@@ -130,6 +173,11 @@ const BannerUploadForm: React.FC<BannerUploadFormProps> = ({ dirType, id }) => {
       <small className="text-red-600">
         {errors.banner?.message?.toString()}
       </small>
+      {uploadError && (
+        <small className={uploadError.includes("Success") ? "text-green-600" : "text-red-600"}>
+          {uploadError}
+        </small>
+      )}
       <Button disabled={isUploading} type="submit">
         Upload Banner
         {!isUploading ? null : <Loader className="h-4 w-4 animate-spin ml-2" />}
